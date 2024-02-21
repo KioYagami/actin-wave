@@ -1,6 +1,6 @@
 clear variables;
 close all;
-v = 0.35;       %アクチン波の速度 %WT
+v = 0.33;       %アクチン波の速度 %WT
 %v = 0.20;       %アクチン波の速度 %Shootin1b-KO
 length = 41;    %アクチン波の長さ
 time = 5700;   %実行時間
