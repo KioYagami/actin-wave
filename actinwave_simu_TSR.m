@@ -1,40 +1,40 @@
 clear variables;
 close all;
-v = 0.33;       %アクチン波の速度 %WT
-%v = 0.20;      %アクチン波の速度 %Shootin1b-KO
-length = 41;    %アクチン波の長さ
-time = 20000;    %実行時間
+v = 0.33;       % Actin wave velocity % WT
+%v = 0.20;      % Actin wave velocity % Shootin1b-KO
+length = 41;    % Length of actin waves
+time = 20000;   % Simulation time
 
-Base = 238;  %三角形の底辺の長さ
-deg = 60;    %二等辺三角形の頂点の角度
+Base = 238;  % Base length of triangle (0.1 um/pixel)
+deg = 60;    % Vertex angle of triangle
 
-R = (90-(deg/2))*(pi/180); %二等辺三角形の2角
-Height = (Base/2)*tan(R);  %三角形の高さ
-Area = (Base*Height)/2;    %三角形の面積 
-slope = Height/(Base/2);   %三角形の辺の傾き
+R = (90-(deg/2))*(pi/180); % Base angle of triangle (radian)
+Height = (Base/2)*tan(R); 
+Area = (Base*Height)/2;
+slope = Height/(Base/2);
 
 figure(1)
-C = -pi:0.01:0;     %半円を描く
+C = -pi:0.01:0;     % Half circle
 plot((Base/2)*cos(C)+(Base/2), (Base/2)*sin(C)+(Base/2))
 
-Vert = (30725-Area)/Base;    %四角形の縦の長さ
+% Rectangle
+Vert = (30725-Area)/Base;
 y = (Base/2):Vert+(Base/2);
-x = 0*y;    %左側
+x = 0*y;
 hold on
 plot(x, y);
 
-Vert = (30725-Area)/Base;    %四角形の縦の長さ
 y = (Base/2):Vert+(Base/2);
-x = 0*y+Base;   %右側
+x = 0*y+Base;
 hold on
 plot(x, y);
 
-x = 0:(Base/2);     %三角形の左斜辺
+x = 0:(Base/2);     % Left slope of triangle
 y = slope*x+Vert+(Base/2);
 hold on
 plot(x, y);
 
-x = (Base/2):Base;      %三角形の右斜辺
+x = (Base/2):Base;      % Right slope of triangle
 y = -slope*x+(Height*2)+Vert+(Base/2);
 hold on
 plot(x, y);
@@ -43,7 +43,7 @@ xlim([-50 Base+50])
 ylim([-50 Height+Vert+Base/2+50])
 daspect([1 1 1])
 
-x = zeros(1, 1000);      %事前割り当て
+x = zeros(1, 1000);
 y = zeros(1, 1000);
 rad = zeros(1, 1000);
 vec_x = zeros(1, 1000);
@@ -54,28 +54,28 @@ generation_time = zeros(1,1000);
 x_dis = zeros(1, 1000);
 y_dis = zeros(1, 1000);
 h = zeros(1,1000);
-i = 0;        %アクチン波の初期個数は0個
+i = 0;        % Initial number of actin waves
 veerFlag = 0;
 LifetimeFlag = 0;
 d = 1;
 f = 1;
 map = zeros(int16(Height+Vert+(Base/2))+100, Base+100);
 
-for t = 1:time          %時間
+for t = 1:time  % Time
 
     generate = rand();
 
-    if(generate > 0.9)         %アクチン波の発生確率
-        i = i+1;                %アクチン波の個数
+    if(generate > 0.9)  % Probability of actin wave generation
+        i = i+1;    % Number of actin waves
         if(LifetimeFlag == 0)
-            x(i) = rand()*Base;     %x座標
-            if(x(i) <= (Base/2))                %左辺側
+            x(i) = rand()*Base;     % x coordinate
+            if(x(i) <= (Base/2))    % Left side
                 C1 = -acos((x(i)-(Base/2))/(Base/2));
-                y(i) = rand()*(slope*x(i)+Vert+(Base/2)-((Base/2)*sin(C1)+(Base/2)))+((Base/2)*sin(C1)+(Base/2));     %y座標
+                y(i) = rand()*(slope*x(i)+Vert+(Base/2)-((Base/2)*sin(C1)+(Base/2)))+((Base/2)*sin(C1)+(Base/2));     % y coordinate
             end
-            if(x(i) > (Base/2))                 %右辺側
+            if(x(i) > (Base/2))     % Right side
                 C1 = -acos((x(i)-(Base/2))/(Base/2));
-                y(i) = rand()*(-slope*x(i)+Vert+(Base/2)+(Height*2)-((Base/2)*sin(C1)+(Base/2)))+((Base/2)*sin(C1)+(Base/2));    %y座標
+                y(i) = rand()*(-slope*x(i)+Vert+(Base/2)+(Height*2)-((Base/2)*sin(C1)+(Base/2)))+((Base/2)*sin(C1)+(Base/2));    % y coordinate
             end
         elseif(LifetimeFlag == 1)
             x(i) = x_dis(d);
@@ -85,60 +85,61 @@ for t = 1:time          %時間
                 LifetimeFlag = 0;
             end
         end
-        rad(i) = 2*pi*rand();       %方向
-        vec_x(i) = v*cos(rad(i));   %xベクトル
-        vec_y(i) = v*sin(rad(i));   %yベクトル
-        Lifetime(i) = gamrnd(3.016848, 118.9898);   %アクチン波の寿命 %WT
-        %Lifetime(i) = gamrnd(2.397247, 106.2886);  %アクチン波の寿命 %Shootin1b-KO
-        generation_time(i) = t; %生成された時の時間
+        rad(i) = 2*pi*rand();       % Direction of actin wave movement
+        vec_x(i) = v*cos(rad(i));   % x vector
+        vec_y(i) = v*sin(rad(i));   % y vector
+        Lifetime(i) = gamrnd(3.016848, 118.9898);   % Actin wave lifetime % WT
+        %Lifetime(i) = gamrnd(2.397247, 106.2886);  % Actin wave lifetime % Shootin1b-KO
+        generation_time(i) = t; % Generated time
     end
     if(i>0)
-        for num = 1:i   %アクチン波の個数だけ繰り返す
+        for num = 1:i   % Repeat for the number of actin waves
             if Lifetime(num) > 0
                 status(num) = 0;
                 if(mod((t - generation_time(num)), 50) == 0)
-                    veer = (11.1138*randn()-0.614419)*(pi/180);     %変針
+                    veer = (11.1138*randn()-0.614419)*(pi/180);     % Directional change of actin waves
                 else
                     veer = 0;
                 end
             
                 rad(num) = rad(num) - veer;
-                vec_x(num) = v*cos(rad(num));   %xベクトル
-                vec_y(num) = v*sin(rad(num));   %yベクトル
+                vec_x(num) = v*cos(rad(num));   % x vector
+                vec_y(num) = v*sin(rad(num));   % y vector
                 
-                x(num) = x(num) + vec_x(num);   %x方向の移動
-                y(num) = y(num) + vec_y(num);   %y方向の移動
+                x(num) = x(num) + vec_x(num);   % Movement in x direction
+                y(num) = y(num) + vec_y(num);   % Movement in y direction
             
-                if(x(num)<=0)     %左直線に来た時
+                if(x(num)<=0)     % When actin waves pass through left base
                     x(num) = x(num) - vec_x(num);
                     status(num) = 1;
                 end
-                if(x(num)>=Base)  %右直線に来た時
+                if(x(num)>=Base)  % When actin waves pass through right base
                     x(num) = x(num) - vec_x(num);
                     status(num) = 1;
                 end
             
-                if(y(num)>=slope*x(num)+Vert+(Base/2) && x(num)<=(Base/2) && deg~=180)   %左斜辺に来た時
-                    b = y(num) - (-1/slope)*x(num); %左斜面に垂直でx(num),y(num)を通る直線
-                    x(num) = (b-Vert-(Base/2))/(slope-(-1/slope));  %交点のx座標
-                    y(num) = slope*x(num)+Vert+(Base/2);          %交点のy座標
+                % Processing of actin waves at the slope
+                if(y(num)>=slope*x(num)+Vert+(Base/2) && x(num)<=(Base/2) && deg~=180)   % Left slope
+                    b = y(num) - (-1/slope)*x(num); % A straight line perpendicular to the left slope and on x(num), y(num)
+                    x(num) = (b-Vert-(Base/2))/(slope-(-1/slope));  % x coordinate of intersection of straight line and left slope
+                    y(num) = slope*x(num)+Vert+(Base/2);            % y coordinate of intersection of straight line and left slope
                     status(num) = 1;
-                elseif(y(num) >= -slope*x(num)+(Height*2)+Vert+(Base/2) && x(num)>(Base/2) && deg~=180)  %右斜辺に来た時
-                    b = y(num) - (1/slope)*x(num); %右斜面に垂直でx(num),y(num)を通る直線
-                    x(num) = (b-Height*2-Vert-(Base/2))/(-slope-(1/slope));  %交点のx座標
-                    y(num) = -slope*x(num)+(Height*2)+Vert+(Base/2);         %交点のy座標
+                elseif(y(num) >= -slope*x(num)+(Height*2)+Vert+(Base/2) && x(num)>(Base/2) && deg~=180)  % Right slope
+                    b = y(num) - (1/slope)*x(num); % A straight line perpendicular to the right slope and on x(num), y(num)
+                    x(num) = (b-Height*2-Vert-(Base/2))/(-slope-(1/slope));  % x coordinate of intersection of straight line and right slope
+                    y(num) = -slope*x(num)+(Height*2)+Vert+(Base/2);         % y coordinate of intersection of straight line and right slope
                     status(num) = 1;
                 end
             
-                if((y(num)<=(Base/2)) && (x(num)<=(Base/2)) && ((x(num)-(Base/2))^2+(y(num)-(Base/2))^2 >= (Base/2)^2))   %左側の円上に来た時
-                    theta = atan(((Base/2)-y(num))/((Base/2)-x(num)));  %円の中心に対する角度を求める
-                    x(num) = (Base/2)*cos(-pi+theta)+(Base/2);  %円上に移動
-                    y(num) = (Base/2)*sin(-pi+theta)+(Base/2);  %円上に移動
+                if((y(num)<=(Base/2)) && (x(num)<=(Base/2)) && ((x(num)-(Base/2))^2+(y(num)-(Base/2))^2 >= (Base/2)^2))   % Left half ciercle
+                    theta = atan(((Base/2)-y(num))/((Base/2)-x(num))); 
+                    x(num) = (Base/2)*cos(-pi+theta)+(Base/2);  % x coordinate on circle
+                    y(num) = (Base/2)*sin(-pi+theta)+(Base/2);  % y coordinate on circle
                     status(num) = 1;
-                elseif((y(num)<=(Base/2)) && (x(num)>=(Base/2)) && ((x(num)-(Base/2))^2+(y(num)-(Base/2))^2 >= (Base/2)^2))   %右側の円上に来た時
+                elseif((y(num)<=(Base/2)) && (x(num)>=(Base/2)) && ((x(num)-(Base/2))^2+(y(num)-(Base/2))^2 >= (Base/2)^2))   % Right half ciercle
                     theta = atan(((Base/2)-y(num))/(x(num)-(Base/2)));
-                    x(num) = (Base/2)*cos(-theta)+(Base/2);
-                    y(num) = (Base/2)*sin(-theta)+(Base/2);
+                    x(num) = (Base/2)*cos(-theta)+(Base/2);     % x coordinate on circle
+                    y(num) = (Base/2)*sin(-theta)+(Base/2);     % y coordinate on circle
                     status(num) = 1;
                 end
             
@@ -147,6 +148,7 @@ for t = 1:time          %時間
                     status(num) = 1;
                 end
                 
+                % Remaining life
                 Lifetime(num) = Lifetime(num) -1;
                 if(Lifetime(num) <= 0)
                     x_dis(f) = x(num);
@@ -156,10 +158,11 @@ for t = 1:time          %時間
                     status(num) = 2;
                 end
                 
+                % Actin intensity map
                 a = tan(rad(num));
                 b = y(num) - (a*x(num));
                 y_cir = 0;
-                
+               
                 if(cos(rad(num)) >= 0)
                     for p = x(num) - (length*cos(rad(num))) : 0.1 : x(num)
                         q = a*p + b;
@@ -190,10 +193,9 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-%Actin intensity map
-%細胞外周幅20umのactin intensity
+% Intensity of actin waves within a 2 μm-wide region from the cell periphery
 edge_map = zeros(int16(Height+Vert+(Base/2))+100, Base+100);
-for y = (Base/2):Vert+(Base/2)  %四角形
+for y = (Base/2):Vert+(Base/2)  % Rectangle
     for x = 0:20
         edge_x = int16(x)+50;
         edge_y = int16(y)+50;
@@ -217,7 +219,7 @@ end
 
 
 d = 20/cos(R);
-for x = 0:(Base/2)  %三角形左側
+for x = 0:(Base/2)  % Left slope of triangle
     for y = slope*x+Vert+(Base/2)-d:slope*x+Vert+(Base/2)
         edge_x = int16(x)+50;
         edge_y = int16(y)+50;
@@ -227,7 +229,7 @@ for x = 0:(Base/2)  %三角形左側
         edge_map(edge_y, edge_x) = map(edge_y, edge_x);
     end
 end
-for x = (Base/2):Base %三角形右側
+for x = (Base/2):Base % Right slope of triangle
     for y = -slope*x+(Height*2)+Vert+(Base/2)-d:-slope*x+(Height*2)+Vert+(Base/2)
         edge_x = int16(x)+50;
         edge_y = int16(y)+50;
@@ -238,8 +240,8 @@ for x = (Base/2):Base %三角形右側
     end
 end
 
-for C = -pi:0.01:0     %半円を描く
-    for j = 0:20*cos(C) %円右側
+for C = -pi:0.01:0     % Halt circle
+    for j = 0:20*cos(C)
         edge_x = int16((Base/2)*cos(C)+(Base/2))+50-j;
         for k = 0:20*(-sin(C))
             edge_y = int16((Base/2)*sin(C)+(Base/2))+50+k;
@@ -253,7 +255,7 @@ for C = -pi:0.01:0     %半円を描く
             edge_map(edge_y, edge_x) = map(edge_y, edge_x);
         end
     end
-    for j = 0:20*(-cos(C))  %円左側
+    for j = 0:20*(-cos(C))
         edge_x = int16((Base/2)*cos(C)+(Base/2))+50+j;
         for k = 0:20*(-sin(C))
             edge_y = int16((Base/2)*sin(C)+(Base/2))+50+k;
@@ -275,7 +277,7 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-%頂点の角から両方向に50um, 幅20umの範囲のactin intensity
+% Intensity of actin waves within a 2 μm-wide and 5 μm-long regions in both sides of the vertex
 corner_map = zeros(int16(Height+Vert+(Base/2))+100, Base+100);
 n_1 = (Base/2)-(50*cos(R));
 m_1 = Height+Vert+(Base/2)-(50*sin(R));
@@ -323,7 +325,7 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-%細胞全体、外周、角の範囲の面積
+% Area of ​​whole cell, periphery, and vertex
 body_area = ((Base*Height)/2) + (Base*Vert) + ((Base/2)*(Base/2)*pi/2);
 edge_base = Base - ((20/cos((pi/2)-(R)))*2);
 edge_height = edge_base/2*tan(R);

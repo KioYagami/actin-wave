@@ -1,22 +1,22 @@
 clear variables;
 close all;
-v = 0.33;       %アクチン波の速度 %WT
-%v = 0.20;       %アクチン波の速度 %Shootin1b-KO
-length = 41;    %アクチン波の長さ
-time = 20000;   %実行時間
+v = 0.33;       % Actin wave velocity % WT
+%v = 0.20;      % Actin wave velocity % Shootin1b-KO
+length = 41;    % Length of actin waves
+time = 20000;   % Simulation time
 
-pcell.Base = 350;  %三角形の底辺の長さ
-pcell.deg = 60;    %二等辺三角形の頂点の角度
-pcell.R = (90-(pcell.deg/2))*(pi/180);  %底角の角度(ラジアン)
-pcell.Height = (pcell.Base/2)*tan(pcell.R);  %三角形の高さ 
-pcell.slope = pcell.Height/(pcell.Base/2);   %三角形の辺の傾き
+pcell.Base = 350;  % Base length of triangle (0.1 um/pixel)
+pcell.deg = 60;    % Vertex angle of triangle
+pcell.R = (90-(pcell.deg/2))*(pi/180);  % Base angle of triangle (radian)
+pcell.Height = (pcell.Base/2)*tan(pcell.R);
+pcell.slope = pcell.Height/(pcell.Base/2);
 
 figure(1)
 DrawCellRegion(pcell)
 
-x = zeros(1, 1000);      %事前割り当て
+x = zeros(1, 1000);
 y = zeros(1, 1000);
-prex = zeros(1, 1000);      %事前割り当て
+prex = zeros(1, 1000);
 prey = zeros(1, 1000);
 rad = zeros(1, 1000);
 vec_x = zeros(1, 1000);
@@ -27,7 +27,7 @@ generation_time = zeros(1,1000);
 h = zeros(1,1000);
 x_dis = zeros(1, 1000);
 y_dis = zeros(1, 1000);
-i = 0;        %アクチン波の初期個数は0個
+i = 0;        % Initial number of actin waves
 veerFlag = 0;
 LifetimeFlag = 0;
 d = 1;
@@ -36,17 +36,16 @@ map = zeros(int16(pcell.Height)+100, pcell.Base+100);
 
 %%
 current_time = datetime('now');
-% 現在時刻をシード値として設定
-seed_value = current_time.Second; % 例: 現在の秒をシード値として使用
-% 乱数ジェネレーターのシードを設定
+seed_value = current_time.Second;
+% Set the seed of random generator
 rng(seed_value);
 
-for t = 1:time          %時間
+for t = 1:time  % Time
 
   generate = rand();
 
-  if(generate > 0.9)         %アクチン波の発生確率
-    i = i+1;                %アクチン波の個数
+  if(generate > 0.9)    % Probability of actin wave generation
+    i = i+1;    % Number of actin waves
 
     if(LifetimeFlag == 0)
       p = rand();
@@ -54,8 +53,8 @@ for t = 1:time          %時間
       m1 = min(p, q);
       m2 = 1.0 - max(p, q);
       m3 = max(p, q) - min(p, q);
-      x(i) = m1*0 + m2*(pcell.Base/2) + m3*pcell.Base; %x座標
-      y(i) = m1*0 + m2*pcell.Height + m3*0;      %y座標
+      x(i) = m1*0 + m2*(pcell.Base/2) + m3*pcell.Base;  % x coordinate
+      y(i) = m1*0 + m2*pcell.Height + m3*0;             % y coordinate
     elseif(LifetimeFlag == 1)
       x(i) = x_dis(d);
       y(i) = y_dis(d);
@@ -65,71 +64,70 @@ for t = 1:time          %時間
       end
     end
 
-    rad(i) = 2*pi*rand();       %移動方向
-    vec_x(i) = v*cos(rad(i));   %xベクトル
-    vec_y(i) = v*sin(rad(i));   %yベクトル
-    Lifetime(i) = gamrnd(3.016848, 118.9898); %アクチン波の寿命 %WT
-    %Lifetime(i) = gamrnd(2.397247, 106.2886); %アクチン波の寿命 %Shootin1b-KO
-    generation_time(i) = t; %生成された時の時間
+    rad(i) = 2*pi*rand();       % Direction of actin wave movement
+    vec_x(i) = v*cos(rad(i));   % x vector
+    vec_y(i) = v*sin(rad(i));   % y vector
+    Lifetime(i) = gamrnd(3.016848, 118.9898); % Actin wave lifetime % WT
+    %Lifetime(i) = gamrnd(2.397247, 106.2886); % Actin wave lifetime % Shootin1b-KO
+    generation_time(i) = t; % Generated time
 
   end
 
   if(i>0)
-    for num = 1:i   %アクチン波の個数だけ繰り返す
+    for num = 1:i   % Repeat for the number of actin waves
 
       if Lifetime(num) > 0
-        status(num) = 0;  % Edge 上 = 1
+        status(num) = 0;  % On edge = 1
         if(mod((t - generation_time(num)), 50) == 0)
-          veer = (11.1138*randn()-0.614419)*(pi/180);     %変針
+          veer = (11.1138*randn()-0.614419)*(pi/180);     % Directional change of actin waves
         else
           veer = 0;
         end
 
         rad(num) = rad(num) + veer;
-        vec_x(num) = v*cos(rad(num));   %xベクトル
-        vec_y(num) = v*sin(rad(num));   %yベクトル
+        vec_x(num) = v*cos(rad(num));   % x vector
+        vec_y(num) = v*sin(rad(num));   % y vector
 
-        x(num) = x(num) + vec_x(num);   %x方向の移動
-        y(num) = y(num) + vec_y(num);   %y方向の移動
+        x(num) = x(num) + vec_x(num);   % Movement in x direction
+        y(num) = y(num) + vec_y(num);   % Movement in y direction
 
-        % エッジに来たときの処理
-        if(y(num) >= pcell.slope*x(num))   %左斜辺に来た時
-          b = y(num) - (-1/pcell.slope)*x(num); %左斜面に垂直でx(num),y(num)を通る直線
-          x(num) = b/(pcell.slope-(-1/pcell.slope));  %交点のx座標
-          y(num) = pcell.slope*x(num);          %交点のy座標
+        % Processing of actin waves at the slope
+        if(y(num) >= pcell.slope*x(num))   % Left slope
+          b = y(num) - (-1/pcell.slope)*x(num); % A straight line perpendicular to the left slope and on x(num), y(num)
+          x(num) = b/(pcell.slope-(-1/pcell.slope));  % x coordinate of intersection of straight line and left slope
+          y(num) = pcell.slope*x(num);                % y coordinate of intersection of straight line and left slope
           status(num) = 1;
-        elseif(y(num) >= -pcell.slope*x(num)+(pcell.Height*2))  %右斜辺に来た時
-          b = y(num) - (1/pcell.slope)*x(num); %右斜面に垂直でx(num),y(num)を通る直線
-          x(num) = (b-pcell.Height*2)/(-pcell.slope-(1/pcell.slope));  %交点のx座標
-          y(num) = -pcell.slope*x(num)+(pcell.Height*2);         %交点のy座標
+        elseif(y(num) >= -pcell.slope*x(num)+(pcell.Height*2))  % Right slope
+          b = y(num) - (1/pcell.slope)*x(num); % A straight line perpendicular to the right slope and on x(num), y(num)
+          x(num) = (b-pcell.Height*2)/(-pcell.slope-(1/pcell.slope));  % x coordinate of intersection of straight right and left slope
+          y(num) = -pcell.slope*x(num)+(pcell.Height*2);               % y coordinate of intersection of straight line and right slope
           status(num) = 1;
         end
 
-        if(y(num) <= 0) %底面に来た時
+        if(y(num) <= 0) % Processing of actin waves at the base
           y(num) = y(num) - vec_y(num);
           status(num) = 1;
         end
 
-        % エッジに沿って動いて頂点にきたとき
-        % 上
-        if(y(num) >= pcell.Height) %頂点より上に来た時
+        % When actin waves pass through vertex
+        if(y(num) >= pcell.Height) 
           y(num) = y(num) - vec_y(num);
           status(num) = 1;
         end
-        % 左下
+        % When actin waves pass through left base
         if(x(num) <= 0)
           x(num) = x(num) - vec_x(num);
           status(num) = 1;
         end
-        % 右下
+        % When actin waves pass through right base
         if(x(num) >= pcell.Base)
           x(num) = x(num) - vec_x(num);
           status(num) = 1;
         end
 
-        % 寿命減らし
-        Lifetime(num) = Lifetime(num) - 1;  %Lifetime減算
-        if(Lifetime(num) <= 0)  %消失時の座標を記録
+        % Remaining life
+        Lifetime(num) = Lifetime(num) - 1;
+        if(Lifetime(num) <= 0)  % Record the coordinates of disappearance
           x_dis(f) = x(num);
           y_dis(f) = y(num);
           LifetimeFlag = 1;
@@ -137,6 +135,7 @@ for t = 1:time          %時間
           status(num) = 2;
         end
 
+        % Actin intensity map
         a = tan(rad(num));
         b = y(num) - (a*x(num));
         if(cos(rad(num)) >= 0)
@@ -169,8 +168,7 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-%Actin intensity map
-%細胞外周幅20umのactin intensity
+% Intensity of actin waves within a 2 μm-wide region from the cell periphery
 edge_map = zeros(int16(pcell.Height)+100, pcell.Base+100);
 imageSize = [round(pcell.Height)+100, round(pcell.Base)+100];
 
@@ -200,7 +198,7 @@ axis xy;
 daspect([1 1 1]);
 
 d = 20/cos(pcell.R);
-%頂点の角から両方向に50um, 幅20umの範囲のactin intensity
+% Intensity of actin waves within a 2 μm-wide and 5 μm-long regions in both sides of the vertex
 corner_map = zeros(int16(pcell.Height)+100, pcell.Base+100);
 n_1 = (pcell.Base/2)-(50*cos(pcell.R));
 m_1 = pcell.Height-(50*sin(pcell.R));
@@ -240,7 +238,7 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-%細胞全体、外周、角の範囲の面積
+% Area of ​​whole cell, periphery, and vertex
 body_area = (pcell.Base*pcell.Height)/2;
 
 edge_base = (pcell.Base-((20*tan((pi/2)-(pcell.R/2)))*2));
@@ -259,17 +257,17 @@ disp("corner/edge: " + (corner_intensity/edge_intensity))
 
 
 function DrawCellRegion(pcell)
-X1 = 0:pcell.Base;    %三角形の底辺
+X1 = 0:pcell.Base;    % Base of triangle
 Y1 = 0*X1;
 hold on
 plot(X1, Y1);
 
-X2 = 0:(pcell.Base/2);     %三角形の左斜辺
+X2 = 0:(pcell.Base/2);     % Left slope of triangle
 Y2 = pcell.slope*X2;
 hold on
 plot(X2, Y2);
 
-X3 = (pcell.Base/2):pcell.Base;      %三角形の右斜辺
+X3 = (pcell.Base/2):pcell.Base;      % Right slope of triangle
 Y3 = -pcell.slope*X3+(pcell.Height*2);
 hold on
 plot(X3, Y3);
