@@ -1,11 +1,11 @@
 clear variables;
 close all;
 v = 0.33;       % Actin wave velocity % WT
-%v = 0.20;      % Actin wave velocity % Shootin1b-KO
+%v = 0.20;      % Actin wave velocity % Shootin1b-KO#1
 length = 41;    % Length of actin waves
 time = 20000;   % Simulation time
 
-Base = 238;  % Base length of triangle (0.1 um/pixel)
+Base = 238;  % Base length of triangle (0.1 μm/pixel)
 deg = 60;    % Vertex angle of triangle
 
 R = (90-(deg/2))*(pi/180); % Base angle of triangle (radian)
@@ -14,10 +14,9 @@ Area = (Base*Height)/2;
 slope = Height/(Base/2);
 
 figure(1)
-C = -pi:0.01:0;     % Half circle
+C = -pi:0.01:0;
 plot((Base/2)*cos(C)+(Base/2), (Base/2)*sin(C)+(Base/2))
 
-% Rectangle
 Vert = (30725-Area)/Base;
 y = (Base/2):Vert+(Base/2);
 x = 0*y;
@@ -61,6 +60,12 @@ d = 1;
 f = 1;
 map = zeros(int16(Height+Vert+(Base/2))+100, Base+100);
 
+%%
+current_time = datetime('now');
+seed_value = current_time.Second;
+% Set the seed of random generator
+rng(seed_value);
+
 for t = 1:time  % Time
 
     generate = rand();
@@ -89,8 +94,8 @@ for t = 1:time  % Time
         vec_x(i) = v*cos(rad(i));   % x vector
         vec_y(i) = v*sin(rad(i));   % y vector
         Lifetime(i) = gamrnd(3.016848, 118.9898);   % Actin wave lifetime % WT
-        %Lifetime(i) = gamrnd(2.397247, 106.2886);  % Actin wave lifetime % Shootin1b-KO
-        generation_time(i) = t; % Generated time
+        %Lifetime(i) = gamrnd(2.397247, 106.2886);  % Actin wave lifetime % Shootin1b-KO#1
+        generation_time(i) = t; % Time of actin wave emergence
     end
     if(i>0)
         for num = 1:i   % Repeat for the number of actin waves
@@ -109,37 +114,37 @@ for t = 1:time  % Time
                 x(num) = x(num) + vec_x(num);   % Movement in x direction
                 y(num) = y(num) + vec_y(num);   % Movement in y direction
             
-                if(x(num)<=0)     % When actin waves pass through left base
+                % Processing when actin waves collide with the plasma membrane
+                if(x(num)<=0)
                     x(num) = x(num) - vec_x(num);
                     status(num) = 1;
                 end
-                if(x(num)>=Base)  % When actin waves pass through right base
+                if(x(num)>=Base)
                     x(num) = x(num) - vec_x(num);
                     status(num) = 1;
                 end
             
-                % Processing of actin waves at the slope
-                if(y(num)>=slope*x(num)+Vert+(Base/2) && x(num)<=(Base/2) && deg~=180)   % Left slope
-                    b = y(num) - (-1/slope)*x(num); % A straight line perpendicular to the left slope and on x(num), y(num)
-                    x(num) = (b-Vert-(Base/2))/(slope-(-1/slope));  % x coordinate of intersection of straight line and left slope
-                    y(num) = slope*x(num)+Vert+(Base/2);            % y coordinate of intersection of straight line and left slope
+                if(y(num)>=slope*x(num)+Vert+(Base/2) && x(num)<=(Base/2) && deg~=180)
+                    b = y(num) - (-1/slope)*x(num);
+                    x(num) = (b-Vert-(Base/2))/(slope-(-1/slope));
+                    y(num) = slope*x(num)+Vert+(Base/2);
                     status(num) = 1;
-                elseif(y(num) >= -slope*x(num)+(Height*2)+Vert+(Base/2) && x(num)>(Base/2) && deg~=180)  % Right slope
-                    b = y(num) - (1/slope)*x(num); % A straight line perpendicular to the right slope and on x(num), y(num)
-                    x(num) = (b-Height*2-Vert-(Base/2))/(-slope-(1/slope));  % x coordinate of intersection of straight line and right slope
-                    y(num) = -slope*x(num)+(Height*2)+Vert+(Base/2);         % y coordinate of intersection of straight line and right slope
+                elseif(y(num) >= -slope*x(num)+(Height*2)+Vert+(Base/2) && x(num)>(Base/2) && deg~=180)
+                    b = y(num) - (1/slope)*x(num);
+                    x(num) = (b-Height*2-Vert-(Base/2))/(-slope-(1/slope));
+                    y(num) = -slope*x(num)+(Height*2)+Vert+(Base/2);
                     status(num) = 1;
                 end
             
-                if((y(num)<=(Base/2)) && (x(num)<=(Base/2)) && ((x(num)-(Base/2))^2+(y(num)-(Base/2))^2 >= (Base/2)^2))   % Left half ciercle
+                if((y(num)<=(Base/2)) && (x(num)<=(Base/2)) && ((x(num)-(Base/2))^2+(y(num)-(Base/2))^2 >= (Base/2)^2))
                     theta = atan(((Base/2)-y(num))/((Base/2)-x(num))); 
-                    x(num) = (Base/2)*cos(-pi+theta)+(Base/2);  % x coordinate on circle
-                    y(num) = (Base/2)*sin(-pi+theta)+(Base/2);  % y coordinate on circle
+                    x(num) = (Base/2)*cos(-pi+theta)+(Base/2);
+                    y(num) = (Base/2)*sin(-pi+theta)+(Base/2);
                     status(num) = 1;
-                elseif((y(num)<=(Base/2)) && (x(num)>=(Base/2)) && ((x(num)-(Base/2))^2+(y(num)-(Base/2))^2 >= (Base/2)^2))   % Right half ciercle
+                elseif((y(num)<=(Base/2)) && (x(num)>=(Base/2)) && ((x(num)-(Base/2))^2+(y(num)-(Base/2))^2 >= (Base/2)^2))
                     theta = atan(((Base/2)-y(num))/(x(num)-(Base/2)));
-                    x(num) = (Base/2)*cos(-theta)+(Base/2);     % x coordinate on circle
-                    y(num) = (Base/2)*sin(-theta)+(Base/2);     % y coordinate on circle
+                    x(num) = (Base/2)*cos(-theta)+(Base/2);
+                    y(num) = (Base/2)*sin(-theta)+(Base/2);
                     status(num) = 1;
                 end
             
@@ -158,7 +163,7 @@ for t = 1:time  % Time
                     status(num) = 2;
                 end
                 
-                % Actin intensity map
+                % F-actin intensity map
                 a = tan(rad(num));
                 b = y(num) - (a*x(num));
                 y_cir = 0;
@@ -193,7 +198,7 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-% Intensity of actin waves within a 2 μm-wide region from the cell periphery
+% F-actin intensity within a 2 μm-wide region from the cell periphery
 edge_map = zeros(int16(Height+Vert+(Base/2))+100, Base+100);
 for y = (Base/2):Vert+(Base/2)  % Rectangle
     for x = 0:20
@@ -240,7 +245,7 @@ for x = (Base/2):Base % Right slope of triangle
     end
 end
 
-for C = -pi:0.01:0     % Halt circle
+for C = -pi:0.01:0
     for j = 0:20*cos(C)
         edge_x = int16((Base/2)*cos(C)+(Base/2))+50-j;
         for k = 0:20*(-sin(C))
@@ -277,7 +282,7 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-% Intensity of actin waves within a 2 μm-wide and 5 μm-long regions in both sides of the vertex
+% F-actin intensity within a 2 μm-wide and 5 μm-long regions in both sides of the vertex
 corner_map = zeros(int16(Height+Vert+(Base/2))+100, Base+100);
 n_1 = (Base/2)-(50*cos(R));
 m_1 = Height+Vert+(Base/2)-(50*sin(R));
@@ -325,7 +330,7 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-% Area of ​​whole cell, periphery, and vertex
+% Area of ​​whole cell, periphery, and corner
 body_area = ((Base*Height)/2) + (Base*Vert) + ((Base/2)*(Base/2)*pi/2);
 edge_base = Base - ((20/cos((pi/2)-(R)))*2);
 edge_height = edge_base/2*tan(R);

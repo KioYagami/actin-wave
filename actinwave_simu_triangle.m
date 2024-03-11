@@ -5,7 +5,7 @@ v = 0.33;       % Actin wave velocity % WT
 length = 41;    % Length of actin waves
 time = 20000;   % Simulation time
 
-pcell.Base = 350;  % Base length of triangle (0.1 um/pixel)
+pcell.Base = 350;  % Base length of triangle (0.1 μm/pixel)
 pcell.deg = 60;    % Vertex angle of triangle
 pcell.R = (90-(pcell.deg/2))*(pi/180);  % Base angle of triangle (radian)
 pcell.Height = (pcell.Base/2)*tan(pcell.R);
@@ -91,35 +91,34 @@ for t = 1:time  % Time
         x(num) = x(num) + vec_x(num);   % Movement in x direction
         y(num) = y(num) + vec_y(num);   % Movement in y direction
 
-        % Processing of actin waves at the slope
-        if(y(num) >= pcell.slope*x(num))   % Left slope
-          b = y(num) - (-1/pcell.slope)*x(num); % A straight line perpendicular to the left slope and on x(num), y(num)
-          x(num) = b/(pcell.slope-(-1/pcell.slope));  % x coordinate of intersection of straight line and left slope
-          y(num) = pcell.slope*x(num);                % y coordinate of intersection of straight line and left slope
+        % Processing when actin waves collide with the plasma membrane
+        if(y(num) >= pcell.slope*x(num))
+          b = y(num) - (-1/pcell.slope)*x(num);
+          x(num) = b/(pcell.slope-(-1/pcell.slope));
+          y(num) = pcell.slope*x(num);
           status(num) = 1;
-        elseif(y(num) >= -pcell.slope*x(num)+(pcell.Height*2))  % Right slope
-          b = y(num) - (1/pcell.slope)*x(num); % A straight line perpendicular to the right slope and on x(num), y(num)
-          x(num) = (b-pcell.Height*2)/(-pcell.slope-(1/pcell.slope));  % x coordinate of intersection of straight right and left slope
-          y(num) = -pcell.slope*x(num)+(pcell.Height*2);               % y coordinate of intersection of straight line and right slope
+        elseif(y(num) >= -pcell.slope*x(num)+(pcell.Height*2))
+          b = y(num) - (1/pcell.slope)*x(num);
+          x(num) = (b-pcell.Height*2)/(-pcell.slope-(1/pcell.slope));
+          y(num) = -pcell.slope*x(num)+(pcell.Height*2);
           status(num) = 1;
         end
 
-        if(y(num) <= 0) % Processing of actin waves at the base
+        if(y(num) <= 0)
           y(num) = y(num) - vec_y(num);
           status(num) = 1;
         end
 
-        % When actin waves pass through vertex
         if(y(num) >= pcell.Height) 
           y(num) = y(num) - vec_y(num);
           status(num) = 1;
         end
-        % When actin waves pass through left base
+
         if(x(num) <= 0)
           x(num) = x(num) - vec_x(num);
           status(num) = 1;
         end
-        % When actin waves pass through right base
+        
         if(x(num) >= pcell.Base)
           x(num) = x(num) - vec_x(num);
           status(num) = 1;
@@ -127,7 +126,7 @@ for t = 1:time  % Time
 
         % Remaining life
         Lifetime(num) = Lifetime(num) - 1;
-        if(Lifetime(num) <= 0)  % Record the coordinates of disappearance
+        if(Lifetime(num) <= 0)
           x_dis(f) = x(num);
           y_dis(f) = y(num);
           LifetimeFlag = 1;
@@ -135,7 +134,7 @@ for t = 1:time  % Time
           status(num) = 2;
         end
 
-        % Actin intensity map
+        % F-Actin intensity map
         a = tan(rad(num));
         b = y(num) - (a*x(num));
         if(cos(rad(num)) >= 0)
@@ -168,7 +167,7 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-% Intensity of actin waves within a 2 μm-wide region from the cell periphery
+% F-actin intensity within a 2 μm-wide region from the cell periphery
 edge_map = zeros(int16(pcell.Height)+100, pcell.Base+100);
 imageSize = [round(pcell.Height)+100, round(pcell.Base)+100];
 
@@ -198,7 +197,7 @@ axis xy;
 daspect([1 1 1]);
 
 d = 20/cos(pcell.R);
-% Intensity of actin waves within a 2 μm-wide and 5 μm-long regions in both sides of the vertex
+% F-actin intensity within a 2 μm-wide and 5 μm-long regions in both sides of the vertex
 corner_map = zeros(int16(pcell.Height)+100, pcell.Base+100);
 n_1 = (pcell.Base/2)-(50*cos(pcell.R));
 m_1 = pcell.Height-(50*sin(pcell.R));
@@ -238,7 +237,7 @@ colorbar;
 axis xy;
 daspect([1 1 1]);
 
-% Area of ​​whole cell, periphery, and vertex
+% Area of ​​whole cell, periphery, and corner
 body_area = (pcell.Base*pcell.Height)/2;
 
 edge_base = (pcell.Base-((20*tan((pi/2)-(pcell.R/2)))*2));

@@ -5,7 +5,7 @@ v = 0.33;       % Actin wave velocity % WT
 length = 41;    % Length of actin waves
 time = 5700;    % Simulation time
 
-pa.Base = 238;   % Base length of triangle (0.1 um/pixel)
+pa.Base = 238;   % Base length of triangle (0.1 μm/pixel)
 pa.deg = 120;    % Vertex angle of triangle
 pa.R = (90-(pa.deg/2))*(pi/180);    % Base angle of triangle (radian)
 pa.Height = (pa.Base/2)*tan(pa.R);
@@ -13,7 +13,7 @@ pa.slope = pa.Height/(pa.Base/2);
 pa.Area = (pa.Base*pa.Height)/2;
 pa.Vert = (30725-pa.Area)/pa.Base;
 
-C = -pi:0.01:0;     % Half circle
+C = -pi:0.01:0;
 cir_x = (pa.Base/2)*cos(C)+(pa.Base/2);
 cir_y = (pa.Base/2)*sin(C)+(pa.Base/2);
 
@@ -109,37 +109,37 @@ for t = 1:time  % Time
                 x(num) = x(num) + vec_x(num);   % Movement in x direction
                 y(num) = y(num) + vec_y(num);   % Movement in y direction
 
-                if(x(num)<=0)       % When actin waves pass through left base
+                % Processing when actin waves collide with the plasma membrane
+                if(x(num)<=0)
                     x(num) = x(num) - vec_x(num);
                     status(num) = 1;
                 end
-                if(x(num)>=pa.Base) % When actin waves pass through right base
+                if(x(num)>=pa.Base)
                     x(num) = x(num) - vec_x(num);
                     status(num) = 1;
                 end
 
-                % Processing of actin waves at the slope
-                if(y(num)>=pa.slope*x(num)+pa.Vert+(pa.Base/2) && x(num)<=(pa.Base/2) && pa.deg~=180)   % Left slope
-                    b = y(num) - (-1/pa.slope)*x(num); % A straight line perpendicular to the left slope and on x(num), y(num)
-                    x(num) = (b-pa.Vert-(pa.Base/2))/(pa.slope-(-1/pa.slope));  % x coordinate of intersection of straight line and left slope
-                    y(num) = pa.slope*x(num)+pa.Vert+(pa.Base/2);          % y coordinate of intersection of straight line and left slope
+                if(y(num)>=pa.slope*x(num)+pa.Vert+(pa.Base/2) && x(num)<=(pa.Base/2) && pa.deg~=180)
+                    b = y(num) - (-1/pa.slope)*x(num);
+                    x(num) = (b-pa.Vert-(pa.Base/2))/(pa.slope-(-1/pa.slope));
+                    y(num) = pa.slope*x(num)+pa.Vert+(pa.Base/2);
                     status(num) = 1;
-                elseif(y(num) >= -pa.slope*x(num)+(pa.Height*2)+pa.Vert+(pa.Base/2) && x(num)>(pa.Base/2) && pa.deg~=180)  % Right slope
-                    b = y(num) - (1/pa.slope)*x(num); % A straight line perpendicular to the right slope and on x(num), y(num)
-                    x(num) = (b-pa.Height*2-pa.Vert-(pa.Base/2))/(-pa.slope-(1/pa.slope));  % x coordinate of intersection of straight line and right slope
-                    y(num) = -pa.slope*x(num)+(pa.Height*2)+pa.Vert+(pa.Base/2);            % y coordinate of intersection of straight line and right slope
+                elseif(y(num) >= -pa.slope*x(num)+(pa.Height*2)+pa.Vert+(pa.Base/2) && x(num)>(pa.Base/2) && pa.deg~=180)
+                    b = y(num) - (1/pa.slope)*x(num);
+                    x(num) = (b-pa.Height*2-pa.Vert-(pa.Base/2))/(-pa.slope-(1/pa.slope));
+                    y(num) = -pa.slope*x(num)+(pa.Height*2)+pa.Vert+(pa.Base/2);
                     status(num) = 1;
                 end
 
-                if((y(num)<=(pa.Base/2)) && (x(num)<=(pa.Base/2)) && ((x(num)-(pa.Base/2))^2+(y(num)-(pa.Base/2))^2 >= (pa.Base/2)^2))   % Left half ciercle
+                if((y(num)<=(pa.Base/2)) && (x(num)<=(pa.Base/2)) && ((x(num)-(pa.Base/2))^2+(y(num)-(pa.Base/2))^2 >= (pa.Base/2)^2))
                     theta = atan(((pa.Base/2)-y(num))/((pa.Base/2)-x(num)));
-                    x(num) = (pa.Base/2)*cos(-pi+theta)+(pa.Base/2);  % x coordinate on circle
-                    y(num) = (pa.Base/2)*sin(-pi+theta)+(pa.Base/2);  % y coordinate on circle
+                    x(num) = (pa.Base/2)*cos(-pi+theta)+(pa.Base/2);
+                    y(num) = (pa.Base/2)*sin(-pi+theta)+(pa.Base/2);
                     status(num) = 1;
-                elseif((y(num)<=(pa.Base/2)) && (x(num)>=(pa.Base/2)) && ((x(num)-(pa.Base/2))^2+(y(num)-(pa.Base/2))^2 >= (pa.Base/2)^2))   % Right half ciercle
+                elseif((y(num)<=(pa.Base/2)) && (x(num)>=(pa.Base/2)) && ((x(num)-(pa.Base/2))^2+(y(num)-(pa.Base/2))^2 >= (pa.Base/2)^2))
                     theta = atan(((pa.Base/2)-y(num))/(x(num)-(pa.Base/2)));
-                    x(num) = (pa.Base/2)*cos(-theta)+(pa.Base/2);   % x coordinate on circle
-                    y(num) = (pa.Base/2)*sin(-theta)+(pa.Base/2);   % y coordinate on circle
+                    x(num) = (pa.Base/2)*cos(-theta)+(pa.Base/2);
+                    y(num) = (pa.Base/2)*sin(-theta)+(pa.Base/2);
                     status(num) = 1;
                 end
 
